@@ -1,1 +1,81 @@
-# aks-endpoint-caller
+# AKS Endpoint Caller
+
+It is a micro service which calls a set of Endpoints collecting the results.   
+There are two kind of Endpoints:
+1. External: These are URLs with unknown result
+1. Recursive: These are URLs where instances of this micro-service is deployed, so the result format is well known 
+
+It is a very simple application that allows us to test communication and lack of it.
+
+It is mainly useful to test networking policies. It was created to help us on AKS Regulated Cluster, but it can be used base on your needs.
+
+## Application
+It is a basic .Net 5.0 web application. It was created using Visual Studio 2019.
+
+### Build docker images
+Before deploying on Kubernetes we need to create the docker image. There is a DockerFile as part of the solution.
+
+```bash
+docker build -f ".\SimpleChainApi\Dockerfile" --force-rm -t aks-endpoint-caller --target final .
+```
+
+If you are using Azure Kubernetes Service you need to [push your image on a Azure Container Registry](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli)
+
+### Kubertnes deploy
+
+It is an example of a deployment on AKS.
+ 
+```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-endpoint
+spec:
+  selector:
+    matchLabels:
+      app: ingress-endpoint
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ingress-endpoint
+    spec:
+      containers:
+      - name: ingress-endpoint
+        image: myacr.azurecr.io/aks-endpoint-caller
+        ports:
+        - containerPort: 80
+        env:
+        - name: SELF_HOSTS_DEPENDENCIES
+          value: "http://service-a,http://service-b,http://service-c"
+        - name: EXTERNAL_DEPENDENCIES
+          value: "https://whatismyip.io/"
+        - name: "DEPTH"
+          value: "2"
+```
+We need to define some environment variables:
+1. EXTERNAL_DEPENDENCIES, These are URLs with an unknown result
+1. SELF_HOSTS_DEPENDENCIES, These are URLs where instances of this micro-service is deployed, so the result format is well known
+1. DEPTH, This value is for doing the recursive calls. The default is 0, not dependency is call. If the value is bigger than 0 the dependencies are call, and the recursive dependencies are called using (DEPTH-1). This parameter avoid infinite calls. This parameter is needed to be set only in the entry point of micro services components.
+
+### Example
+We can create the configuration which is useful for us. A possible setup is:
+1. Ingress Enpoint is the starting point, and calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC
+1.  serviceA calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC
+1.  serviceB calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC
+1.  serviceC calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC   
+
+![A possible setup is](./ApiChain.png)
+Some arrows are not display as draw simplification
+### Result Page
+Navigating the root of the ingress micro service endpoint and it will throws the test and shows a result like:
+
+![Result Page](./result-page.PNG)
+
+## Contributions
+
+Please see our [contributor guide](./CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
+
+With :heart: from Microsoft Patterns & Practices, [Azure Architecture Center](https://aka.ms/architecture).
