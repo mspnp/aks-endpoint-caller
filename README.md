@@ -16,7 +16,7 @@ It is a basic .Net 5.0 web application. It was created using Visual Studio 2019.
 Before deploying on Kubernetes we need to create the docker image. There is a DockerFile as part of the solution.
 
 ```bash
-docker build -f ".\SimpleChainApi\Dockerfile" --force-rm -t aks-endpoint-caller --target final .
+docker build -f ".\SimpleChainApi\Dockerfile" --force-rm -t aks-endpoint-caller:1.0 --target final .
 ```
 
 If you are using Azure Kubernetes Service you need to [push your image on a Azure Container Registry](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli)
@@ -42,9 +42,9 @@ spec:
     spec:
       containers:
       - name: ingress-endpoint
-        image: myacr.azurecr.io/aks-endpoint-caller
+        image: myacr.azurecr.io/aks-endpoint-caller:1.0
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         env:
         - name: SELF_HOSTS_DEPENDENCIES
           value: "http://service-a,http://service-b,http://service-c"
@@ -54,16 +54,16 @@ spec:
           value: "2"
 ```
 We need to define some environment variables:
-1. EXTERNAL_DEPENDENCIES, These are URLs with an unknown result
-1. SELF_HOSTS_DEPENDENCIES, These are URLs where instances of this micro-service is deployed, so the result format is well known
-1. DEPTH, This value is for doing the recursive calls. The default is 0, not dependency is call. If the value is bigger than 0 the dependencies are call, and the recursive dependencies are called using (DEPTH-1). This parameter avoid infinite calls. This parameter is needed to be set only in the entry point of micro services components.
+1. `EXTERNAL_DEPENDENCIES` - These are URLs with an unknown result; as a comma-separated list
+1. `SELF_HOSTS_DEPENDENCIES` - These are URLs where instances of this micro service is deployed, so the result format is well known; as a comma-separated list.
+1. `DEPTH` - This value is for doing the recursive calls. The default is `0`, meaning no dependencies are called. If the value is larger than `0` the dependencies are call, and the recursive dependencies are called using (`DEPTH-1`). This parameter avoid infinite calls. This parameter is needed to be set only in the entry point of micro services components.
 
 ### Example
-We can create the configuration which is useful for us. A possible setup is:
-1. Ingress Enpoint is the starting point, and calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC
-1.  serviceA calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC
-1.  serviceB calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC
-1.  serviceC calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC   
+We can create the configuration which is useful for the situation we want to test. An example setup is:
+1. Ingress Endpoint is the starting point, and calls: https://www.microsoft.com, https://serviceA, https://serviceB,  https://serviceC
+1.  serviceA calls: https://www.microsoft.com, https://serviceA, https://serviceB, https://serviceC
+1.  serviceB calls: https://www.microsoft.com, https://serviceA, https://serviceB, https://serviceC
+1.  serviceC calls: https://www.microsoft.com, https://serviceA, https://serviceB, https://serviceC   
 
 ![A possible setup is](./ApiChain.png)
 Some arrows are not display as draw simplification
