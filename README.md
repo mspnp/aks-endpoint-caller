@@ -16,6 +16,7 @@ It is a basic .Net 5.0 web application. It was created using Visual Studio 2019.
 Before deploying on Kubernetes we need to create the docker image. There is a DockerFile as part of the solution.
 
 ```bash
+cd SimpleChainApi
 docker build -f ".\SimpleChainApi\Dockerfile" --force-rm -t aks-endpoint-caller:1.0 --target final .
 ```
 
@@ -26,6 +27,21 @@ If you are using Azure Kubernetes Service you need to [push your image on a Azur
 It is an example of a deployment on AKS.
  
 ```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-endpoint-service
+  labels:
+    app: ingress-endpoint-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: ingress-endpoint-http
+  selector:
+    app: ingress-endpoint 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -42,16 +58,16 @@ spec:
     spec:
       containers:
       - name: ingress-endpoint
-        image: myacr.azurecr.io/aks-endpoint-caller:1.0
+        image: aks-endpoint-caller:1.0
         ports:
         - containerPort: 8080
         env:
         - name: SELF_HOSTS_DEPENDENCIES
-          value: "http://service-a,http://service-b,http://service-c"
+          value: ""
         - name: EXTERNAL_DEPENDENCIES
           value: "https://whatismyip.io/"
         - name: "DEPTH"
-          value: "2"
+          value: "1"
 ```
 We need to define some environment variables:
 1. `EXTERNAL_DEPENDENCIES` - These are URLs with an unknown result; as a comma-separated list
