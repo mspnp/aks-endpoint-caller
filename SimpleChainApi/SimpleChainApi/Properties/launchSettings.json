@@ -1,0 +1,41 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:56170",
+      "sslPort": 0
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "SimpleChainApi": {
+      "commandName": "Project",
+      "launchBrowser": true,
+        "environmentVariables": {
+            "SELF_HOSTS_DEPENDENCIES": "http://localhost:5001",
+            "ASPNETCORE_ENVIRONMENT": "Development",
+            "EXTERNAL_DEPENDENCIES": "https://packages.microsoft.com,https://failure",
+            "DEPTH": "2"
+        },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "http://localhost:5001"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "environmentVariables": {
+        "EXTERNAL_DEPENDENCIES": "https://www.microsoft.com/,https://www.bing.com/,https://failure/"
+      },
+      "publishAllPorts": true
+    }
+  }
+}
