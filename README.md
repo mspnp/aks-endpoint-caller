@@ -20,7 +20,7 @@ cd SimpleChainApi
 docker build -f ".\SimpleChainApi\Dockerfile" --force-rm -t aks-endpoint-caller:1.0 --target final .
 ```
 
-If you are using Azure Kubernetes Service you need to [push your image on a Azure Container Registry](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli)
+If you are using Azure Kubernetes Service you need to [push your image on a Azure Container Registry](https://learn.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli)
 
 ### Kubertnes deploy
 
