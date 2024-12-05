@@ -10,7 +10,7 @@ It is a very simple application that allows us to test communication and lack of
 It is mainly useful to test networking policies. It was created to help us on AKS Regulated Cluster, but it can be used base on your needs.
 
 ## Application
-It is a basic .Net 5.0 web application. It was created using Visual Studio 2019.
+It is a basic .Net 9.0 web application. It was created using Visual Studio 2022.
 
 ### Build docker images
 Before deploying on Kubernetes we need to create the docker image. There is a DockerFile as part of the solution.
